@@ -69,7 +69,7 @@ func TestMatchKey(t *testing.T){
 		log.Printf("Fail: return_error isn't null.");
 	}
 	//### Path Failure
-	/*matchkey_path_object, return_error = New( MATCHKEY_TYPE_PATH, "test*?- ]\\\\\\" ); //I can't find any pattern that will trigger the bad pattern error.
+	matchkey_path_object, return_error = New( MATCHKEY_TYPE_PATH, "t\\" );
 	if( return_error.CodeEqual( ERROR_CODE_PATH_MATCH ) == true ){
 		if( matchkey_path_object == MATCHKEY_NIL_VALUE ){
 			log.Printf("Success");
@@ -80,7 +80,7 @@ func TestMatchKey(t *testing.T){
 	} else{
 		t.Fail();
 		log.Printf("Fail: return_error isn't ERROR_CODE_PATH_MATCH %v", return_error);
-	}*/
+	}
 	//### Path Success
 	matchkey_path_object, return_error = New( MATCHKEY_TYPE_PATH, "test*" );
 	if( return_error.CodeEqual( 0 ) == true ){

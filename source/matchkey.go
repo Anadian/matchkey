@@ -17,6 +17,7 @@ import(
 	//"strings"
 	"path"
 	"regexp"
+	//"log"
 	//## External
 	error_report "github.com/Anadian/error_report/source"
 );
@@ -136,7 +137,9 @@ func New( matchkey_type uint8, matchkey_string string ) (new_matchkey MatchKey_s
 			new_matchkey.Matchkey_string = matchkey_string;
 			new_matchkey.compiled_regexp = nil;
 		case MATCHKEY_TYPE_PATH:
-			match_bool, match_error = path.Match( matchkey_string, "" );
+			//log.Printf("%s", matchkey_string);
+			match_bool, match_error = path.Match( matchkey_string, "te" );
+			//log.Printf("%s", matchkey_string);
 			if( match_error != nil ){
 				return_error = error_report.New( ERROR_CODE_PATH_MATCH, map[string]interface{}{
 					"match_error": match_error,
