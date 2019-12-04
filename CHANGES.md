@@ -1,3 +1,4 @@
 - 2019-12-04 v0.0.0 First commit.
 - 2019-12-04 v0.0.1 Added test.
 - 2019-12-04 v0.0.2 Triggering CI.
+- 2019-12-04 v0.0.3 Added badges and cleaned up godoc.

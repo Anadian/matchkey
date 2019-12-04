@@ -40,11 +40,13 @@ const(
 );
 
 //Types, structs, and methods
+
 // MatchKey_interface is the interface for `MatchKey`s
 type MatchKey_interface interface{
 	Match( name string ) (match_bool bool, return_error error)
 	/* AsString() string //Returns the initial string value. */
 }
+
 // MatchKey_struct is the struct which implements the MatchKey interface and holds neccessary data for initialised MatchKeys.
 type MatchKey_struct struct{
 	Matchkey_type uint8
@@ -61,6 +63,7 @@ type MatchKey_struct struct{
 * @retval true Match
 * @retval false No match.
 */
+
 // Match returns true if the given string matches the MatchKey dependent on the MatchKey type; false otherwise.
 func (matchkey MatchKey_struct) Match( check_string string ) (match bool, return_error error_report.ErrorReport_struct){
 	/* Variables */
@@ -118,6 +121,7 @@ var(
 * @retval 1 Not Supported
 * @retval >1 Error
 */
+
 // New creates a new MatchKey, for a specified type, from a given string value.
 func New( matchkey_type uint8, matchkey_string string ) (new_matchkey MatchKey_struct, return_error error_report.ErrorReport_struct){
 	/* Variables */
