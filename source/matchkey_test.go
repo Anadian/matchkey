@@ -15,6 +15,7 @@ import(
 	"testing"
 	"log"
 	//External
+	error_report "github.com/Anadian/error_report/source"
 );
 
 //Constants
@@ -32,175 +33,273 @@ var(
 
 //Exported Functions
 func TestMatchKey(t *testing.T){
-	log.SetFlags(LstdFlags|Lmicroseconds|Lshortfile);
+	log.SetFlags( log.LstdFlags | log.Lmicroseconds | log.Lshortfile);
 	//Variables
-	var matchkey_object [4]MatchKey_struct = nil;
-	var new_error error_report.ErrorReport_struct;
-	var match_bool bool = false;
-	var match_error error = nil;
-	//Expected returns
-	var expected_matchkey_object [2]MatchKey_struct = { nil, (!nil) };
-	var expected_new_error [3]error = { nil, invalid_param_error, compile_error;
-	var expected_match_bool [2]bool = false;
-	var expected_match_error [2]error = nil;
+	var matchkey_object MatchKey_struct;
+	var matchkey_string_object MatchKey_struct;
+	var matchkey_path_object MatchKey_struct;
+	var matchkey_regex_object MatchKey_struct;
+	var return_error error_report.ErrorReport_struct;
 	//# Tests
 	//## New
-	//#### Params
-	test_param [4]uint8 = {MATCHKEY_TYPE_STRING, MATCHKEY_TYPE_PATH;
-	invalid_type_param uint8 = 4;
-	//#### Invalid Argument
-	//##### Conditions
-	//###### Variables
-	/*matchkey_object = nil;
-	new_error = nil;
-	match_bool = false;
-	match_error = nil;
-	//Expected returns
-	expected_matchkey_object = nil;
-	expected_new_error = nil;
-	expected_match_bool bool = false;
-	expected_match_error error = nil;*/
-	/*
-	for New
-		if params
-		then
-			for match
-				if params
-				then
-					success
-				else params
-					fail
-		else params
-			fail
-			for match
-				if params
-				then
-					success
-				else
-					fail
-	*/
-	//## New with an invalid matchkey_type
-	matchkey_object, new_error = New( 4, "test*" );
-	if( matchkey_object == nil ){
-		if( new_error.CodeEqual( ERROR_CODE_INVALID_ARGUMENT_MATCHKEY_TYPE ){
+	//### Invalid matchkey_type
+	matchkey_object, return_error = New( 4, "test*" );
+	if( matchkey_object == MATCHKEY_NIL_VALUE ){
+		if( return_error.CodeEqual( ERROR_CODE_INVALID_ARGUMENT_MATCHKEY_TYPE ) == true ){
+			log.Printf("Success.");
 		} else{
-			log.Printf("Fail: new_error is nil.");
+			log.Printf("Fail: return_error doesn't equal ERROR_CODE_INVALID_ARGUMENT_MATCHKEY_TYPE.");
 			t.Fail();
 		}
 	} else{
 		log.Printf("Fail: matchkey_object isn't nil.");
 		t.Fail();
 	}
-	//New: string-types
-	matchkey_object, new_error = New( MATCHKEY_TYPE_STRING, "test*" );
-	if( new_error == nil ){
-		if( matchkey_object !== nil ){
-			match_bool = matchkey_object.Match("test*");
-			if( match_bool == true ){
-				match_bool = matchkey_object.Match("test");
-				if( match_bool == false ){
-					match_bool = matchkey_object.Match("tests");
-					if( match_bool == false ){
-						log.Printf("Pass: string-type matching works.");
-					} else{
-						t.Fail();
-						log.Printf("Fail");
-					}
-				} else{
-					t.Fail();
-					log.Printf("Fail");
-				}
-			} else{
-				t.Fail();
-				log.Printf("Fail");
-			}
+	//### String Success
+	matchkey_string_object, return_error = New( MATCHKEY_TYPE_STRING, "test*" );
+	if( return_error.CodeEqual( 0 ) == true ){
+		if( matchkey_string_object != MATCHKEY_NIL_VALUE ){
+			log.Printf("Success.");
 		} else{
 			t.Fail();
-			log.Printf("Fail");
+			log.Printf("Fail: matchkey_string_object is null.");
 		}
 	} else{
 		t.Fail();
-		log.Printf("Fail");
+		log.Printf("Fail: return_error isn't null.");
 	}
-	//New: path-types
-	matchkey_object, new_error = New( MATCHKEY_TYPE_PATH, "test*s+" );
-	if( new_error == nil ){
-		if( matchkey_object !== nil ){
-			match_bool = matchkey_object.Match("test*");
-			if( match_bool == false ){
-				match_bool = matchkey_object.Match("test");
-				if( match_bool == false ){
-					match_bool = matchkey_object.Match("tests");
-					if( match_bool == false ){
-						match_bool = matchkey_object.Match("tes");
-						if( match_bool == false ){
-							match_bool = matchkey_object.Match("test*a");
-							if( match_bool == false ){
-								match_bool = matchkey_object.Match("testwords+");
-								if( match_bool == true ){
-									match_bool = matchkey_object.Match("testtttts+");
-									if( match_bool == true ){
-										match_bool
-								log.Printf("Pass: path-type matching works.");
-							} else{
-								t.Fail();
-								log.Printf("Fail");
-							}
-						} else{
-							t.Fail();
-							log.Printf("Fail");
-						}
-					} else{
-						t.Fail();
-						log.Printf("Fail");
-					}
-				} else{
-					t.Fail();
-					log.Printf("Fail");
-				}
-			} else{
-				t.Fail();
-				log.Printf("Fail");
-			}
+	//### Path Failure
+	/*matchkey_path_object, return_error = New( MATCHKEY_TYPE_PATH, "test*?- ]\\\\\\" ); //I can't find any pattern that will trigger the bad pattern error.
+	if( return_error.CodeEqual( ERROR_CODE_PATH_MATCH ) == true ){
+		if( matchkey_path_object == MATCHKEY_NIL_VALUE ){
+			log.Printf("Success");
 		} else{
 			t.Fail();
-			log.Printf("Fail");
+			log.Printf("Fail: matchkey_path_object is null.");
 		}
 	} else{
 		t.Fail();
-		log.Printf("Fail");
-	}
-	//New: regex-types
-	matchkey_object, new_error = New( MATCHKEY_TYPE_REGEX, "test*s+" );
-	if( new_error == nil ){
-		if( matchkey_object !== nil ){
-			match_bool = matchkey_object.Match("test*");
-			if( match_bool == true ){
-				match_bool = matchkey_object.Match("test");
-				if( match_bool == false ){
-					match_bool = matchkey_object.Match("tests");
-					if( match_bool == false ){
-						log.Printf("Pass: regex-type matching works.");
-					} else{
-						t.Fail();
-						log.Printf("Fail");
-					}
-				} else{
-					t.Fail();
-					log.Printf("Fail");
-				}
-			} else{
-				t.Fail();
-				log.Printf("Fail");
-			}
+		log.Printf("Fail: return_error isn't ERROR_CODE_PATH_MATCH %v", return_error);
+	}*/
+	//### Path Success
+	matchkey_path_object, return_error = New( MATCHKEY_TYPE_PATH, "test*" );
+	if( return_error.CodeEqual( 0 ) == true ){
+		if( matchkey_path_object != MATCHKEY_NIL_VALUE ){
+			log.Printf("Success.");
 		} else{
 			t.Fail();
-			log.Printf("Fail");
+			log.Printf("Fail: matchkey_path_object is null.");
 		}
 	} else{
 		t.Fail();
-		log.Printf("Fail");
+		log.Printf("Fail: return_error isn't null.");
 	}
-
+	//### Regex Failure
+	matchkey_regex_object, return_error = New( MATCHKEY_TYPE_REGEX, "t^e(st*" ); //)
+	if( matchkey_regex_object == MATCHKEY_NIL_VALUE ){
+		if( return_error.CodeEqual( ERROR_CODE_REGEXP_COMPILE ) == true ){
+			log.Printf("Success.");
+		} else{
+			t.Fail();
+			log.Printf("Fail: return_error isn't ERROR_CODE_REGEXP_COMPILE.");
+		}
+	} else{
+		t.Fail();
+		log.Printf("Fail: matchkey_regex_object isn't nil.");
+	}
+	//### Regex Success
+	matchkey_regex_object, return_error = New( MATCHKEY_TYPE_REGEX, "test*" );
+	if( return_error.CodeEqual( 0 ) == true ){
+		if( matchkey_regex_object != MATCHKEY_NIL_VALUE ){
+			log.Printf("Success.");
+		} else{
+			t.Fail();
+			log.Printf("Fail: matchkey_regex_object is null.");
+		}
+	} else{
+		t.Fail();
+		log.Printf("Fail: return_error isn't null.");
+	}
+	//## Match
+	//### Uninitialised
+	var match_bool bool;
+	match_bool, return_error = matchkey_object.Match( "test*" );
+	if( return_error.CodeEqual( ERROR_CODE_INVALID_PROPERTY_MATCHKEY_TYPE ) == true ){
+		log.Printf("Success.");
+	} else{
+		t.Fail();
+		log.Printf("Fail: return_error wasn't ERROR_CODE_INVALID_PROPERTY_MATCHKEY_TYPE");
+	}
+	//### String Failure
+	match_bool, return_error = matchkey_string_object.Match( "test" );
+	if( return_error.CodeEqual( 0 ) == true ){
+		if( match_bool == false ){
+			log.Printf("Success.");
+		} else{
+			t.Fail();
+			log.Printf("Fail: there was a match when there shouldn't have been one.");
+		}
+	} else{
+		t.Fail();
+		log.Printf("Fail: there was an error.");
+	}
+	match_bool, return_error = matchkey_string_object.Match( "testa" );
+	if( return_error.CodeEqual( 0 ) == true ){
+		if( match_bool == false ){
+			log.Printf("Success.");
+		} else{
+			t.Fail();
+			log.Printf("Fail: there was a match when there shouldn't have been one.");
+		}
+	} else{
+		t.Fail();
+		log.Printf("Fail: there was an error.");
+	}
+	//### String Success
+	match_bool, return_error = matchkey_string_object.Match( "test*" );
+	if( return_error.CodeEqual( 0 ) == true ){
+		if( match_bool == true ){
+			log.Printf("Success.");
+		} else{
+			t.Fail();
+			log.Printf("Fail: there wasn't a match when there should have been one.");
+		}
+	} else{
+		t.Fail();
+		log.Printf("Fail: there was an error.");
+	}
+	//### Path Match Error
+	/*match_bool, return_error = matchkey_path_object.Match( "test*?[" );
+	if( return_error.CodeEqual( ERROR_CODE_PATH_MATCH ) == true ){
+		log.Printf("Success.");
+	} else{
+		t.Fail();
+		log.Printf("Fail: return_error wasn't ERROR_CODE_PATH_MATCH.");
+	}*/
+	//### Path Failure
+	match_bool, return_error = matchkey_path_object.Match( "tes" );
+	if( return_error.CodeEqual( 0 ) == true ){
+		if( match_bool == false ){
+			log.Printf("Success.");
+		} else{
+			t.Fail();
+			log.Printf("Fail: false-positive match.");
+		}
+	} else{
+		t.Fail();
+		log.Printf("Fail: there was an error.");
+	}
+	match_bool, return_error = matchkey_path_object.Match( "tesa" );
+	if( return_error.CodeEqual( 0 ) == true ){
+		if( match_bool == false ){
+			log.Printf("Success.");
+		} else{
+			t.Fail();
+			log.Printf("Fail: false-positive match.");
+		}
+	} else{
+		t.Fail();
+		log.Printf("Fail: there was an error.");
+	}
+	//### Path Success
+	match_bool, return_error = matchkey_path_object.Match( "test" );
+	if( return_error.CodeEqual( 0 ) == true ){
+		if( match_bool == true ){
+			log.Printf("Success.");
+		} else{
+			t.Fail();
+			log.Printf("Fail: false-negative match.");
+		}
+	} else{
+		t.Fail();
+		log.Printf("Fail: there was an error.");
+	}
+	match_bool, return_error = matchkey_path_object.Match( "testaaaa" );
+	if( return_error.CodeEqual( 0 ) == true ){
+		if( match_bool == true ){
+			log.Printf("Success.");
+		} else{
+			t.Fail();
+			log.Printf("Fail: false-negative match.");
+		}
+	} else{
+		t.Fail();
+		log.Printf("Fail: there was an error.");
+	}
+	//### Regex Failure
+	match_bool, return_error = matchkey_regex_object.Match( "te" );
+	if( return_error.CodeEqual( 0 ) == true ){
+		if( match_bool == false ){
+			log.Printf("Success.");
+		} else{
+			t.Fail();
+			log.Printf("Fail: false-positive match.");
+		}
+	} else{
+		t.Fail();
+		log.Printf("Fail: there was an error.");
+	}
+	//### Regex Success
+	match_bool, return_error = matchkey_regex_object.Match( "tes" );
+	if( return_error.CodeEqual( 0 ) == true ){
+		if( match_bool == true ){
+			log.Printf("Success.");
+		} else{
+			t.Fail();
+			log.Printf("Fail: false-negative match.");
+		}
+	} else{
+		t.Fail();
+		log.Printf("Fail: there was an error.");
+	}
+	match_bool, return_error = matchkey_regex_object.Match( "test" );
+	if( return_error.CodeEqual( 0 ) == true ){
+		if( match_bool == true ){
+			log.Printf("Success.");
+		} else{
+			t.Fail();
+			log.Printf("Fail: false-negative match.");
+		}
+	} else{
+		t.Fail();
+		log.Printf("Fail: there was an error.");
+	}
+	match_bool, return_error = matchkey_regex_object.Match( "testttt" );
+	if( return_error.CodeEqual( 0 ) == true ){
+		if( match_bool == true ){
+			log.Printf("Success.");
+		} else{
+			t.Fail();
+			log.Printf("Fail: false-negative match.");
+		}
+	} else{
+		t.Fail();
+		log.Printf("Fail: there was an error.");
+	}
+	match_bool, return_error = matchkey_regex_object.Match( "tesa" );
+	if( return_error.CodeEqual( 0 ) == true ){
+		if( match_bool == true ){
+			log.Printf("Success.");
+		} else{
+			t.Fail();
+			log.Printf("Fail: false-negative match.");
+		}
+	} else{
+		t.Fail();
+		log.Printf("Fail: there was an error.");
+	}
+	match_bool, return_error = matchkey_regex_object.Match( "testtttta" );
+	if( return_error.CodeEqual( 0 ) == true ){
+		if( match_bool == true ){
+			log.Printf("Success.");
+		} else{
+			t.Fail();
+			log.Printf("Fail: false-negative match.");
+		}
+	} else{
+		t.Fail();
+		log.Printf("Fail: there was an error.");
+	}
+}
 //Private Functions
 

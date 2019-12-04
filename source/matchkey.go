@@ -12,9 +12,9 @@ package matchkey;
 import(
 	//## Internal
 	//## Standard
-	"errors" //For catching Go's native errors.
+	//"errors" //For catching Go's native errors.
 	"fmt"
-	"strings"
+	//"strings"
 	"path"
 	"regexp"
 	//## External
@@ -49,7 +49,7 @@ type MatchKey_interface interface{
 type MatchKey_struct struct{
 	Matchkey_type uint8
 	Matchkey_string string
-	compiled_regexp *regexp.RegExp
+	compiled_regexp *regexp.Regexp
 }
 
 /**
@@ -72,16 +72,16 @@ func (matchkey MatchKey_struct) Match( check_string string ) (match bool, return
 			if( check_string == matchkey.Matchkey_string ){
 				match = true;
 			} else{
-				match = else;
+				match = false;
 			}
 		case MATCHKEY_TYPE_PATH:
 			match, path_match_error = path.Match( matchkey.Matchkey_string, check_string );
-			if( path_match_error !== nil ){
+			if( path_match_error != nil ){
 				return_error = error_report.New( ERROR_CODE_PATH_MATCH, map[string]interface{}{
-					"message": string{ fmt.Sprintf("Error: path.Match(\"%s\", \"%s\") returned an error: %s", matchkey.Matchkey_string, check_string, path_match_error) },
-					"matchkey_string": string{ matchkey.Matchkey_string },
-					"check_string": string{ check_string },
-					"path_match_error": error{ path_match_error },
+					"message": fmt.Sprintf("Error: path.Match(\"%s\", \"%s\") returned an error: %s", matchkey.Matchkey_string, check_string, path_match_error),
+					"matchkey_string": matchkey.Matchkey_string,
+					"check_string": check_string,
+					"path_match_error": path_match_error,
 				}, nil );
 			}
 		case MATCHKEY_TYPE_REGEX:
@@ -92,8 +92,8 @@ func (matchkey MatchKey_struct) Match( check_string string ) (match bool, return
 			}
 		default:
 			return_error = error_report.New( ERROR_CODE_INVALID_PROPERTY_MATCHKEY_TYPE, map[string]interface{}{
-				"message": string{ fmt.Sprintf("Error: invalid property `Matchkey_type` (%d); was this MatchKey properly initialised?", matchkey.Matchkey_type) },
-				"Matchkey_type": uint8{ matchkey.Matchkey_type },
+				"message": fmt.Sprintf("Error: invalid property `Matchkey_type` (%d); was this MatchKey properly initialised?", matchkey.Matchkey_type),
+				"Matchkey_type": matchkey.Matchkey_type,
 			}, nil );
 	}
 	/* Return */
@@ -103,6 +103,7 @@ func (matchkey MatchKey_struct) Match( check_string string ) (match bool, return
 //Global Variables
 var(
 	//Exported Variables
+	MATCHKEY_NIL_VALUE MatchKey_struct = MatchKey_struct{ MATCHKEY_TYPE_UNSPECIFIED, "", nil }
 	//Private Variables
 );
 
@@ -120,32 +121,51 @@ var(
 // New creates a new MatchKey, for a specified type, from a given string value.
 func New( matchkey_type uint8, matchkey_string string ) (new_matchkey MatchKey_struct, return_error error_report.ErrorReport_struct){
 	/* Variables */
+	var match_bool bool;
+	var match_error error = nil;
 	var regexp_compile_error error = nil;
 	/* Parametres */
 	/* Function */
 	switch(matchkey_type){
-		case MATCHKEY_TYPE_STRING, MATCHKEY_TYPE_PATH:
+		case MATCHKEY_TYPE_STRING:
 			new_matchkey.Matchkey_type = matchkey_type;
 			new_matchkey.Matchkey_string = matchkey_string;
 			new_matchkey.compiled_regexp = nil;
+		case MATCHKEY_TYPE_PATH:
+			match_bool, match_error = path.Match( matchkey_string, "" );
+			if( match_error != nil ){
+				return_error = error_report.New( ERROR_CODE_PATH_MATCH, map[string]interface{}{
+					"match_error": match_error,
+				}, nil );
+				new_matchkey = MATCHKEY_NIL_VALUE;
+			} else{
+				return_error = error_report.New( 0, map[string]interface{}{
+					"match_bool": match_bool,
+					"match_error": match_error,
+					"matchkey_string": matchkey_string,
+				}, nil );
+				new_matchkey.Matchkey_type = matchkey_type;
+				new_matchkey.Matchkey_string = matchkey_string;
+				new_matchkey.compiled_regexp = nil;
+			}
 		case MATCHKEY_TYPE_REGEX:
 			new_matchkey.Matchkey_type = matchkey_type;
 			new_matchkey.Matchkey_string = matchkey_string;
 			new_matchkey.compiled_regexp, regexp_compile_error = regexp.Compile(matchkey_string);
-			if( regexp_compile_error !== nil ){
+			if( regexp_compile_error != nil ){
 				return_error = error_report.New( ERROR_CODE_REGEXP_COMPILE, map[string]interface{}{
-					"message": string{ fmt.Sprintf("Error: regexp.Compile(%s) returned an error: %s", matchkey_string, regexp_compile_error.Error()) },
-					"matchkey_string": string{ matchkey_string },
-					"regexp_compile_error": error{ regexp_compile_error },
+					"message": fmt.Sprintf("Error: regexp.Compile(%s) returned an error: %s", matchkey_string, regexp_compile_error.Error()),
+					"matchkey_string": matchkey_string,
+					"regexp_compile_error": regexp_compile_error,
 				}, nil );
-				new_matchkey = nil;
+				new_matchkey = MATCHKEY_NIL_VALUE;
 			}
 		default:
 			return_error = error_report.New( ERROR_CODE_INVALID_ARGUMENT_MATCHKEY_TYPE, map[string]interface{}{
-				"message": string{ fmt.Sprintf("Error: invalid argument `matchkey_type`: %d", matchkey_type) },
-				"matchkey_type": uint8{ matchkey_type },
+				"message": fmt.Sprintf("Error: invalid argument `matchkey_type`: %d", matchkey_type),
+				"matchkey_type": matchkey_type,
 			}, nil );
-			new_matchkey = nil;
+			new_matchkey = MATCHKEY_NIL_VALUE;
 	}
 	/* Return */
 	return;
